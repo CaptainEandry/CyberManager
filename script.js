@@ -1,3 +1,4 @@
+import { katalogHrozeb } from './data.js';
 class SecurityIncident {
     id;
     name;
@@ -43,3 +44,15 @@ class RiskRegistry {
     }
     getIncidents() { return this.incidents; }
 }
+// Test tříd a constructoru v konzoli
+console.log("--- CyberRisk Simulator Inicializován ---");
+const mujRegistr = new RiskRegistry();
+const data1 = katalogHrozeb[0];
+const ddos = new TechnicalIncident(data1.id, data1.nazev, data1.baseRate, 10, data1.recoveryCost);
+const data2 = katalogHrozeb[1];
+const unik = new DataBreachIncident(data2.id, data2.nazev, data2.baseRate, 1000, data2.gdprPenalty, data2.legalFees);
+mujRegistr.addIncident(ddos);
+mujRegistr.addIncident(unik);
+// Výpis do konzole
+console.log("Aktivní incidenty:", mujRegistr.getIncidents());
+console.log("Celková škoda v korunách:", mujRegistr.getTotalRisk(), "Kč");
