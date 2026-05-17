@@ -37,10 +37,10 @@ console.log("--- CyberRisk Simulator Inicializován ---");
 const mujRegistr = new RiskRegistry();
 
 const data1 = katalogHrozeb[0];
-const ddos = new TechnicalIncident(data1.id, data1.nazev, data1.baseRate, 10, data1.recoveryCost);
+const ddos = new TechnicalIncident(data1.id, data1.nazev, data1.baseRate, 10, data1.recoveryCost!);
 
 const data2 = katalogHrozeb[1];
-const unik = new DataBreachIncident(data2.id, data2.nazev, data2.baseRate, 1000, data2.gdprPenalty, data2.legalFees);
+const unik = new DataBreachIncident(data2.id, data2.nazev, data2.baseRate, 1000, data2.gdprPenalty!, data2.legalFees!);
 
 mujRegistr.addIncident(ddos);
 mujRegistr.addIncident(unik);
