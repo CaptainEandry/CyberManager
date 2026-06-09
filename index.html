@@ -1,10 +1,90 @@
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>CyberRisk Simulator</title>
+    <title>CyberRisk Simulator</title> 
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <!-- Levý panel: Ovladače a katalog -->
+        <div class="left-panel">
+            <h2>Katalog hrozeb</h2>
+            <div id="threat-list">
+                <!-- Dynamicky generovaná tlačítka -->
+            </div>
+            <div class="threat-item">
+                <button class="btn-attack">DDos</button>
+                <button class="btn-ghost">Upravit</button>
+            </div>
+            <div class="threat-item">
+                <button class="btn-attack">Data breach</button>
+                <button class="btn-ghost">Upravit</button>
+            </div>
+            <button id="btn-add-custom" class="btn-primary" style="margin-top: 20px;">+ Přidat jiný útok</button>
+        </div>
+
+        <!-- Pravý panel: Výsledky -->
+        <div class="right-panel">
+            <h2>Registr rizik</h2>
+            <table id="risk-table">
+                <thead>
+                    <tr>
+                        <th>Název incidentu</th>
+                        <th>Základní sazba</th>
+                        <th>Další náklady</th>
+                        <th>Celková škoda</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody id="risk-tbody">
+                    <!-- Dynamicky generované řádky -->
+                </tbody>
+            </table>
+            <div class="total-risk">
+                Celková škoda: <span id="total-risk-value">0</span> Kč
+            </div>
+        </div>
+    </div>
+
+    <!-- Modální okno pro Úpravu -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-edit">&times;</span>
+            <h3 id="edit-modal-title">Upravit hrozbu</h3>
+            <form id="edit-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-group"><label>Základní sazba (Kč):</label><input type="number" id="edit-base-rate" required></div>
+                <div id="edit-tech-fields" class="form-group" style="display:none;"><label>Náklady na obnovu (Kč):</label><input type="number" id="edit-recovery-cost"></div>
+                <div id="edit-data-fields" style="display:none;">
+                    <div class="form-group"><label>GDPR Pokuta (Kč):</label><input type="number" id="edit-gdpr"></div>
+                    <div class="form-group"><label>Právní poplatky (Kč):</label><input type="number" id="edit-legal"></div>
+                </div>
+                <button type="submit" class="btn-primary">Uložit úpravy</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modální okno pro Nový útok -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-add">&times;</span>
+            <h3>Přidat jiný útok</h3>
+            <form id="add-form">
+                <div class="form-group"><label>Název útoku:</label><input type="text" id="add-name" required></div>
+                <div class="form-group"><label>Typ:</label><select id="add-type"><option value="technical">Technický incident</option><option value="databreach">Únik dat</option></select></div>
+                <div class="form-group"><label>Základní sazba (Kč):</label><input type="number" id="add-base-rate" required></div>
+                <div id="add-tech-fields" class="form-group"><label>Náklady na obnovu (Kč):</label><input type="number" id="add-recovery" required></div>
+                <div id="add-data-fields" style="display:none;">
+                    <div class="form-group"><label>GDPR Pokuta (Kč):</label><input type="number" id="add-gdpr"></div>
+                    <div class="form-group"><label>Právní poplatky (Kč):</label><input type="number" id="add-legal"></div>
+                </div>
+                <button type="submit" class="btn-primary">Vytvořit</button>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
