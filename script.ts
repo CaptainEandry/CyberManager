@@ -1,51 +1,298 @@
-// nahrání dat z katalogu hrozeb
 import { katalogHrozeb } from './data.js';
-// Abstraktní třída pro bezpečnostní incidenty
-abstract class SecurityIncident {
-    constructor(protected id: string, protected name: string, protected baseRate: number) {}
-    public abstract calculateTotalImpact(): number;
-    public getName(): string { return this.name; }
-}
-// Třída pro technické incidenty např. DDOS
-class TechnicalIncident extends SecurityIncident {
-    constructor(id: string, name: string, baseRate: number, private downtime: number, private recovery: number) {
-        super(id, name, baseRate);
-    }
-    public calculateTotalImpact(): number {
-        return (this.downtime * this.baseRate) + this.recovery;
-    }
-}
-// Třída pro incidenty úniku dat
-class DataBreachIncident extends SecurityIncident {
-    constructor(id: string, name: string, baseRate: number, private records: number, private penalty: number, private legal: number) {
-        super(id, name, baseRate);
-    }
-    public calculateTotalImpact(): number {
-        return (this.records * this.penalty) + this.legal;
-    }
-}
-// Třída pro správu rizik a incidentů
-class RiskRegistry {
-    private incidents: SecurityIncident[] = [];
-    public addIncident(incident: SecurityIncident) { this.incidents.push(incident); }
-    public getTotalRisk(): number {
-        return this.incidents.reduce((sum, inc) => sum + inc.calculateTotalImpact(), 0);
-    }
-    public getIncidents() { return this.incidents; }
-}
-// Test tříd a constructoru v konzoli
-console.log("--- CyberRisk Simulator Inicializován ---");
-const mujRegistr = new RiskRegistry();
-// Přidání incidentub
-const data1 = katalogHrozeb[0];
-const ddos = new TechnicalIncident(data1.id, data1.nazev, data1.baseRate, 10, data1.recoveryCost!);
-// Přidání incidentu
-const data2 = katalogHrozeb[1];
-const unik = new DataBreachIncident(data2.id, data2.nazev, data2.baseRate, 1000, data2.gdprPenalty!, data2.legalFees!);
-// Přidání incidentů do registru
-mujRegistr.addIncident(ddos);
-mujRegistr.addIncident(unik);
 
-// Výpis do konzole
-console.log("Aktivní incidenty:", mujRegistr.getIncidents());
-console.log("Celková škoda v korunách:", mujRegistr.getTotalRisk(), "Kč");
+// Abstraktní třída je jako šablona. Nemůžeme z ní vytvořit objekt přímo,
+// ale ostatní třídy z ní mohou dědit (převzít její vlastnosti a metody).
+abstract class BezpecnostniIncident {
+    public idInstance: string; // Unikátní ID pro mazání z tabulky
+    public nazev: string;
+    public zakladniSazba: number;
+
+    constructor(nazev: string, zakladniSazba: number) {
+        this.nazev = nazev;
+        this.zakladniSazba = zakladniSazba;
+        // Vygenerujeme náhodné ID pro tento konkrétní záznam
+        this.idInstance = "id-" + Math.random().toString();
+    }
+
+    // Abstraktní metody nemají tělo. Říkají, že každý potomek (třída, která dědí)
+    // MUSÍ tuto metodu mít a naprogramovat si ji po svém. (To je Polymorfismus)
+    public abstract spocitejCelkovouSkodu(): number;
+    public abstract ziskejDalsiNaklady(): number;
+}
+
+// Třída pro technické útoky (např. DDoS, Ransomware)
+class TechnickyIncident extends BezpecnostniIncident {
+    public nakladyNaObnovu: number;
+
+    constructor(nazev: string, zakladniSazba: number, nakladyNaObnovu: number) {
+        super(nazev, zakladniSazba); // Voláme konstruktor rodiče (BezpecnostniIncident)
+        this.nakladyNaObnovu = nakladyNaObnovu;
+    }
+
+    public spocitejCelkovouSkodu(): number {
+        return this.zakladniSazba + this.nakladyNaObnovu;
+    }
+
+    public ziskejDalsiNaklady(): number {
+        return this.nakladyNaObnovu;
+    }
+}
+
+// Třída pro úniky dat (např. Krádež hesel)
+class UnikDatIncident extends BezpecnostniIncident {
+    public pokutyAPoplatky: number;
+
+    constructor(nazev: string, zakladniSazba: number, pokutyAPoplatky: number) {
+        super(nazev, zakladniSazba);
+        this.pokutyAPoplatky = pokutyAPoplatky;
+    }
+
+    public spocitejCelkovouSkodu(): number {
+        return this.zakladniSazba + this.pokutyAPoplatky;
+    }
+
+    public ziskejDalsiNaklady(): number {
+        return this.pokutyAPoplatky;
+    }
+}
+
+// Třída pro vlastní útoky vytvořené uživatelem přes formulář
+class VlastniIncident extends BezpecnostniIncident {
+    public vlastniNaklady: number;
+
+    constructor(nazev: string, zakladniSazba: number, vlastniNaklady: number) {
+        super(nazev, zakladniSazba);
+        this.vlastniNaklady = vlastniNaklady;
+    }
+
+    public spocitejCelkovouSkodu(): number {
+        return this.zakladniSazba + this.vlastniNaklady;
+    }
+
+    public ziskejDalsiNaklady(): number {
+        return this.vlastniNaklady;
+    }
+}
+
+// --- 2. TŘÍDA PRO SPRÁVU (Ukládání dat aplikace) ---
+
+class RegistrRizik {
+    public incidenty: BezpecnostniIncident[] = [];
+
+    public pridejIncident(incident: BezpecnostniIncident): void {
+        this.incidenty.push(incident);
+    }
+
+    public smazIncident(idInstance: string): void {
+        // Vytvoříme nové prázdné pole a zkopírujeme do něj vše kromě toho, co chceme smazat
+        let novePole: BezpecnostniIncident[] = [];
+        for (let i = 0; i < this.incidenty.length; i++) {
+            if (this.incidenty[i].idInstance !== idInstance) {
+                novePole.push(this.incidenty[i]);
+            }
+        }
+        this.incidenty = novePole;
+    }
+
+    public spocitejCelkoveRiziko(): number {
+        let celkem = 0;
+        for (let i = 0; i < this.incidenty.length; i++) {
+            celkem = celkem + this.incidenty[i].spocitejCelkovouSkodu();
+        }
+        return celkem;
+    }
+}
+
+// --- 3. PROPOJENÍ S HTML STRÁNKOU (DOM) ---
+
+// Kód uvnitř se spustí až ve chvíli, kdy je celá HTML stránka načtená
+document.addEventListener('DOMContentLoaded', function() {
+    
+    let registr = new RegistrRizik();
+
+    // Získání HTML elementů - používáme klasické přiřazení pro lepší čitelnost
+    let seznamHrozebEl = document.getElementById('threat-list') as HTMLDivElement;
+    let tabulkaRizikEl = document.getElementById('risk-tbody') as HTMLTableSectionElement;
+    let celkovaSkodaEl = document.getElementById('total-risk-value') as HTMLSpanElement;
+
+    let oknoUpravit = document.getElementById('edit-modal') as HTMLDivElement;
+    let oknoPridat = document.getElementById('add-modal') as HTMLDivElement;
+    let tlacitkoZavritUpravit = document.getElementById('close-edit') as HTMLSpanElement;
+    let tlacitkoZavritPridat = document.getElementById('close-add') as HTMLSpanElement;
+    let formularUpravit = document.getElementById('edit-form') as HTMLFormElement;
+    let formularPridat = document.getElementById('add-form') as HTMLFormElement;
+    let tlacitkoVlastniUtok = document.getElementById('btn-add-custom') as HTMLButtonElement;
+
+    // Funkce pro překreslení tabulky
+    function prekresliTabulku(): void {
+        // Vyčistíme tabulku
+        tabulkaRizikEl.innerHTML = ''; 
+
+        // Projdeme všechny uložené incidenty a vytvoříme pro ně HTML řádky
+        for (let i = 0; i < registr.incidenty.length; i++) {
+            let incident = registr.incidenty[i];
+            let radek = document.createElement('tr');
+            
+            // Polymorfismus v akci: zavoláme ziskejDalsiNaklady() a spocitejCelkovouSkodu() 
+            // a nestaráme se o to, jaká přesně je to podřízená třída. Každá ví, co má dělat.
+            radek.innerHTML = `
+                <td>${incident.nazev}</td>
+                <td>${incident.zakladniSazba} Kč</td>
+                <td>${incident.ziskejDalsiNaklady()} Kč</td>
+                <td>${incident.spocitejCelkovouSkodu()} Kč</td>
+                <td><button class="btn-delete" data-id="${incident.idInstance}">Smazat</button></td>
+            `;
+
+            tabulkaRizikEl.appendChild(radek);
+        }
+
+        // Aktualizujeme celkový součet dole pod tabulkou
+        celkovaSkodaEl.innerText = registr.spocitejCelkoveRiziko().toString();
+        
+        // Po vytvoření řádků musíme znovu oživit všechna nová tlačítka "Smazat"
+        let tlacitkaSmazat = document.getElementsByClassName('btn-delete');
+        for (let i = 0; i < tlacitkaSmazat.length; i++) {
+            tlacitkaSmazat[i].addEventListener('click', function(udalost) {
+                let tlacitko = udalost.target as HTMLButtonElement;
+                let idKeSmazani = tlacitko.getAttribute('data-id');
+                
+                if (idKeSmazani !== null) {
+                    registr.smazIncident(idKeSmazani);
+                    prekresliTabulku(); // Překreslíme, aby změna byla vidět i na webu
+                }
+            });
+        }
+    }
+
+    // --- 4. DYNAMICKÉ GENEROVÁNÍ KATALOGU HROZEB Z DATA.TS ---
+    
+    for (let i = 0; i < katalogHrozeb.length; i++) {
+        let hrozba = katalogHrozeb[i];
+        
+        // Vytvoříme obalovací div (rámeček pro tlačítka)
+        let polozkaDiv = document.createElement('div');
+        polozkaDiv.className = 'threat-item';
+
+        // Vytvoříme levé červené tlačítko pro rychlé přidání útoku
+        let tlacitkoPridat = document.createElement('button');
+        tlacitkoPridat.className = 'btn-attack';
+        tlacitkoPridat.innerText = hrozba.nazev;
+
+        // Co se stane při kliknutí na název útoku
+        tlacitkoPridat.addEventListener('click', function() {
+            let novyIncident: BezpecnostniIncident;
+
+            // Podle typu hrozby vytvoříme správný objekt
+            if (hrozba.typ === 'technicky') {
+                novyIncident = new TechnickyIncident(hrozba.nazev, hrozba.zakladniSazba, hrozba.dalsiNaklady);
+            } else {
+                novyIncident = new UnikDatIncident(hrozba.nazev, hrozba.zakladniSazba, hrozba.dalsiNaklady);
+            }
+
+            registr.pridejIncident(novyIncident);
+            prekresliTabulku();
+        });
+
+        // Vytvoříme pravé průhledné tlačítko pro úpravu
+        let tlacitkoUpravit = document.createElement('button');
+        tlacitkoUpravit.className = 'btn-ghost';
+        tlacitkoUpravit.innerText = 'Upravit';
+
+        // Co se stane při kliknutí na Upravit
+        tlacitkoUpravit.addEventListener('click', function() {
+            // Do skrytých políček (type="hidden") si uložíme typ a ID, 
+            // abychom po uložení věděli, o jaký útok se jednalo
+            (document.getElementById('edit-id') as HTMLInputElement).value = hrozba.id;
+            (document.getElementById('edit-typ') as HTMLInputElement).value = hrozba.typ;
+            
+            // Předvyplníme viditelná políčka z dat
+            (document.getElementById('edit-modal-title') as HTMLHeadingElement).innerText = "Upravit: " + hrozba.nazev;
+            (document.getElementById('edit-base-rate') as HTMLInputElement).value = hrozba.zakladniSazba.toString();
+            (document.getElementById('edit-other-costs') as HTMLInputElement).value = hrozba.dalsiNaklady.toString();
+
+            oknoUpravit.style.display = 'block'; // Zobrazíme modální okno
+        });
+
+        // Přidáme obě tlačítka do našeho div rámečku a ten vložíme do levého panelu
+        polozkaDiv.appendChild(tlacitkoPridat);
+        polozkaDiv.appendChild(tlacitkoUpravit);
+        seznamHrozebEl.appendChild(polozkaDiv);
+    }
+
+    // --- 5. OBSLUHA FORMULÁŘŮ (ULOŽENÍ ÚPRAV A NOVÉHO ÚTOKU) ---
+
+    // Odeslání formuláře pro upravený útok
+    formularUpravit.addEventListener('submit', function(udalost) {
+        udalost.preventDefault(); // Zabránit znovunačtení stránky po kliknutí na Uložit
+
+        // Načteme hodnoty z inputů (pomocí Number převedeme text z inputu na číslo)
+        let idHrozby = (document.getElementById('edit-id') as HTMLInputElement).value;
+        let typHrozby = (document.getElementById('edit-typ') as HTMLInputElement).value;
+        let zakladniSazba = Number((document.getElementById('edit-base-rate') as HTMLInputElement).value);
+        let dalsiNaklady = Number((document.getElementById('edit-other-costs') as HTMLInputElement).value);
+
+        // Pomocí FOR cyklu najdeme původní název hrozby v kataloguHrozeb
+        let nazevHrozby = "";
+        for (let i = 0; i < katalogHrozeb.length; i++) {
+            if (katalogHrozeb[i].id === idHrozby) {
+                nazevHrozby = katalogHrozeb[i].nazev;
+            }
+        }
+
+        let upravenyIncident: BezpecnostniIncident;
+        
+        // Vytvoříme objekt podle typu
+        if (typHrozby === 'technicky') {
+            upravenyIncident = new TechnickyIncident(nazevHrozby + " (Upraveno)", zakladniSazba, dalsiNaklady);
+        } else {
+            upravenyIncident = new UnikDatIncident(nazevHrozby + " (Upraveno)", zakladniSazba, dalsiNaklady);
+        }
+
+        registr.pridejIncident(upravenyIncident);
+        prekresliTabulku();
+        
+        oknoUpravit.style.display = 'none'; // Zavřeme okno
+    });
+
+    // Otevření okna pro úplně jiný vlastní útok
+    tlacitkoVlastniUtok.addEventListener('click', function() {
+        formularPridat.reset(); // Promaže hodnoty z předchozího psaní
+        oknoPridat.style.display = 'block';
+    });
+
+    // Odeslání formuláře pro vlastní útok
+    formularPridat.addEventListener('submit', function(udalost) {
+        udalost.preventDefault();
+
+        let nazev = (document.getElementById('add-name') as HTMLInputElement).value;
+        let zakladniSazba = Number((document.getElementById('add-base-rate') as HTMLInputElement).value);
+        let dalsiNaklady = Number((document.getElementById('add-other-costs') as HTMLInputElement).value);
+
+        let vlastniIncident = new VlastniIncident(nazev, zakladniSazba, dalsiNaklady);
+        
+        registr.pridejIncident(vlastniIncident);
+        prekresliTabulku();
+        
+        oknoPridat.style.display = 'none';
+    });
+
+    // --- 6. LOGIKA PRO ZAVÍRÁNÍ MODÁLNÍCH OKEN ---
+
+    // Zavírání oken pomocí křížků
+    tlacitkoZavritUpravit.addEventListener('click', function() {
+        oknoUpravit.style.display = 'none';
+    });
+    tlacitkoZavritPridat.addEventListener('click', function() {
+        oknoPridat.style.display = 'none';
+    });
+
+    // Zavření oken kliknutím myši mimo ně (na tmavé pozadí kolem)
+    window.addEventListener('click', function(udalost) {
+        if (udalost.target === oknoUpravit) {
+            oknoUpravit.style.display = 'none';
+        }
+        if (udalost.target === oknoPridat) {
+            oknoPridat.style.display = 'none';
+        }
+    });
+});
