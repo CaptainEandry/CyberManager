@@ -78,3 +78,27 @@ th { background-color: #ecf0f1; }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; }
 .form-group input, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+
+/* Responzivní design pro mobilní zařízení a tablety */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    .left-panel {
+        width: auto; /* Zrušíme pevnou šířku 300px a necháme panel roztáhnout */
+        padding: 15px;
+    }
+    .right-panel {
+        padding: 15px;
+    }
+    .modal-content {
+        width: 80%; /* Modální okno se na mobilech zmenší na 80% šířky obrazovky */
+    }
+    table {
+        display: block; /* Umožní horizontální posouvání (scrollování) tabulky, pokud je širší než displej */
+        overflow-x: auto;
+        white-space: nowrap; /* Zabrání zalamování textu uvnitř buněk tabulky */
+    }
+}
