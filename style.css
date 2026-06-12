@@ -6,20 +6,27 @@ body {
 }
 .container {
     display: flex;
-    height: 100vh;
+    flex-wrap: wrap;
+    min-height: 100vh;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
 }
 .left-panel {
-    width: 300px;
+    flex: 0 0 300px;
     background: #2c3e50;
     color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 .right-panel {
-    flex-grow: 1;
+    flex: 1;
+    min-width: 300px;
     padding: 30px;
-    overflow-y: auto;
+    overflow: auto;
+    box-sizing: border-box;
 }
 .threat-item {
     display: flex;
@@ -36,15 +43,6 @@ body {
     border-radius: 4px;
 }
 .btn-attack:hover { background: #c0392b; }
-.btn-edit {
-    padding: 10px;
-    background: #f1c40f;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    font-weight: bold;
-}
-.btn-edit:hover { background: #f39c12; }
 .btn-ghost {
     padding: 10px;
     background: transparent;
@@ -65,40 +63,64 @@ body {
 }
 .btn-primary:hover { background: #3498db; }
 .btn-delete {
-    background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;
+    background: #e74c3c; 
+    color: white; 
+    border: none; 
+    padding: 6px 12px; 
+    border-radius: 3px; 
+    cursor: pointer;
 }
+.btn-delete:hover { background: #c0392b; }
 table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
 th { background-color: #ecf0f1; }
 .total-risk { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: right; padding: 15px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-.modal-content { background-color: #fff; margin: 10% auto; padding: 20px; width: 400px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.modal-content { background-color: #fff; margin: 10% auto; padding: 20px; width: 400px; max-width: 95%; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); box-sizing: border-box; }
 .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
 .close-btn:hover { color: black; }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; }
 .form-group input, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
 
-/* Responzivní design pro mobilní zařízení a tablety */
-@media (max-width: 768px) {
+/* Media Query pro mobilní telefony (šířka obrazovky pod 768px) */
+@media screen and (max-width: 768px) {
     .container {
         flex-direction: column;
         height: auto;
-        min-height: 100vh;
     }
-    .left-panel {
-        width: auto; /* Zrušíme pevnou šířku 300px a necháme panel roztáhnout */
+    .left-panel, .right-panel {
+        flex: none;
+        width: 100%;
+        min-width: unset;
         padding: 15px;
     }
-    .right-panel {
-        padding: 15px;
+    .btn-primary, .btn-attack, .btn-ghost, .btn-delete {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        box-sizing: border-box;
+    }
+    .threat-item {
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 15px;
     }
     .modal-content {
-        width: 80%; /* Modální okno se na mobilech zmenší na 80% šířky obrazovky */
+        margin: 15% auto;
+        padding: 15px;
     }
     table {
-        display: block; /* Umožní horizontální posouvání (scrollování) tabulky, pokud je širší než displej */
+        display: block;
         overflow-x: auto;
-        white-space: nowrap; /* Zabrání zalamování textu uvnitř buněk tabulky */
+        white-space: nowrap;
+    }
+    th, td {
+        padding: 8px 5px;
+        font-size: 14px;
+    }
+
+    h2 {
+        font-size: 1.5rem;
     }
 }
